@@ -5,7 +5,8 @@ const app = express();
 
 // CORS middleware — ДОБАВЛЕН В САМОЕ НАЧАЛО
 app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', 'https://юристшпагин.рф');
+  // ИСПРАВЛЕНО: используем Punycode для домена
+  res.setHeader('Access-Control-Allow-Origin', 'https://xn--80agnczifjj4d3c.xn--p1ai');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
@@ -28,7 +29,7 @@ app.post('/api/chat', async (req, res) => {
       {
         headers: {
           'Authorization': 'Bearer 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',
-          'HTTP-Referer': 'https://юристшпагин.рф',
+          'HTTP-Referer': 'https://xn--80agnczifjj4d3c.xn--p1ai', // ← Punycode
           'X-Title': 'lawyer-site',
           'Content-Type': 'application/json'
         }

@@ -28,7 +28,7 @@ app.post('/api/chat', async (req, res) => {
       req.body,
       {
         headers: {
-          'Authorization': 'Bearer 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',
+          'Authorization': 'Bearer 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',
           'HTTP-Referer': 'https://xn--80agnczifjj4d3c.xn--p1ai', // ← Punycode
           'X-Title': 'lawyer-site',
           'Content-Type': 'application/json'

@@ -3,14 +3,12 @@ const axios = require('axios');
 
 const app = express();
 
-// CORS middleware — ДОБАВЛЕН В САМОЕ НАЧАЛО
+// CORS middleware
 app.use((req, res, next) => {
-  // ИСПРАВЛЕНО: используем Punycode для домена
   res.setHeader('Access-Control-Allow-Origin', 'https://xn--80agnczifjj4d3c.xn--p1ai');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  // Отвечаем на preflight-запрос сразу — без остального кода
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
@@ -18,18 +16,20 @@ app.use((req, res, next) => {
   next();
 });
 
-// Только после CORS — подключаем JSON-парсер
 app.use(express.json());
 
 app.post('/api/chat', async (req, res) => {
   try {
     const response = await axios.post(
       'https://openrouter.ai/api/v1/chat/completions',
-      req.body,
+      {
+        ...req.body,
+        model: "mistralai/mistral-7b-instruct:free" // ← Бесплатная модель
+      },
       {
         headers: {
           'Authorization': 'Bearer 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',
-          'HTTP-Referer': 'https://xn--80agnczifjj4d3c.xn--p1ai', // ← Punycode
+          'HTTP-Referer': 'https://xn--80agnczifjj4d3c.xn--p1ai',
           'X-Title': 'lawyer-site',
           'Content-Type': 'application/json'
         }

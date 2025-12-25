@@ -24,11 +24,10 @@ app.post('/api/chat', async (req, res) => {
       'https://openrouter.ai/api/v1/chat/completions',
       {
         ...req.body,
-        model: "mistralai/mistral-7b-instruct:free" // ← Бесплатная модель
+        model: "openchat/openchat-3.5-0106:free"
       },
       {
         headers: {
-          'Authorization': 'Bearer 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',
           'HTTP-Referer': 'https://xn--80agnczifjj4d3c.xn--p1ai',
           'X-Title': 'lawyer-site',
           'Content-Type': 'application/json'

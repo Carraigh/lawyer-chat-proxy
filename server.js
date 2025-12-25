@@ -2,20 +2,23 @@ const express = require('express');
 const axios = require('axios');
 
 const app = express();
-app.use(express.json());
 
-// CORS middleware
+// CORS middleware — ДОБАВЛЕН В САМОЕ НАЧАЛО
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', 'https://юристшпагин.рф');
-  res.header('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Origin', 'https://юристшпагин.рф');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
+  // Отвечаем на preflight-запрос сразу — без остального кода
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
 
   next();
 });
+
+// Только после CORS — подключаем JSON-парсер
+app.use(express.json());
 
 app.post('/api/chat', async (req, res) => {
   try {
@@ -38,6 +41,7 @@ app.post('/api/chat', async (req, res) => {
   }
 });
 
-app.listen(process.env.PORT || 3000, () => {
-  console.log(`Server running on port ${process.env.PORT || 3000}`);
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });

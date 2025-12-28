@@ -3,38 +3,46 @@ const axios = require('axios');
 
 const app = express();
 
-// Middleware для CORS — работает для всех запросов
+// CORS
 app.use((req, res, next) => {
-  // Разрешаем запросы с вашего домена
   const allowedOrigins = [
     'https://юристшпагин.рф',
     'https://xn--80agnczifjj4d3c.xn--p1ai'
   ];
   const origin = req.headers.origin;
-
   if (allowedOrigins.includes(origin)) {
     res.setHeader('Access-Control-Allow-Origin', origin);
   }
-
-  // Разрешаем методы и заголовки
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.setHeader('Access-Control-Allow-Credentials', 'true'); // если нужно
-
-  // Обработка preflight-запроса (OPTIONS)
-  if (req.method === 'OPTIONS') {
-    return res.status(204).end();
-  }
-
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  if (req.method === 'OPTIONS') return res.status(204).end();
   next();
 });
 
 app.use(express.json());
 
+// Проверка, работает ли Ollama
+app.get('/health', async (req, res) => {
+  try {
+    const response = await axios.get('http://localhost:11434/api/tags');
+    res.json({ status: 'ok', models: response.data.models });
+  } catch (error) {
+    res.status(500).json({ status: 'error', message: 'Ollama not ready' });
+  }
+});
+
 app.post('/api/chat', async (req, res) => {
   console.log('✅ Получен запрос от:', req.headers.origin);
 
   try {
+    // Проверяем, доступна ли модель
+    const modelCheck = await axios.get('http://localhost:11434/api/tags');
+    const modelExists = modelCheck.data.models.some(m => m.name.startsWith('phi3:mini'));
+    if (!modelExists) {
+      throw new Error('Модель phi3:mini не найдена');
+    }
+
     const messages = [
       {
         role: 'system',
@@ -82,4 +90,5 @@ app.post('/api/chat', async (req, res) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`✅ Сервер запущен на порту ${PORT}`);
+  console.log(`✅ Проверьте здоровье сервиса: https://lawyer-chat-proxy.onrender.com/health`);
 });

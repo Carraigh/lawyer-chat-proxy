@@ -17,8 +17,8 @@ RUN npm install
 # Копируем серверный скрипт
 COPY server.js .
 
-# Скачиваем лёгкую модель phi3:mini (около 2.3 ГБ)
-RUN ollama pull phi3:mini
+# Скачиваем лёгкую модель tinyllama (около 0.5 ГБ)
+RUN ollama pull tinyllama
 
 # Проверяем, что модель действительно загружена
 RUN ollama list

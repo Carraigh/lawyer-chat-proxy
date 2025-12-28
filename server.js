@@ -24,7 +24,7 @@ app.post('/api/chat', async (req, res) => {
       'https://openrouter.ai/api/v1/chat/completions',
       {
         ...req.body,
-        model: "openchat/openchat-3.5-0106:free"
+        model: "gryphe/mythomax-l2-13b"
       },
       {
         headers: {

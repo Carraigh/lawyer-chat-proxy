@@ -3,20 +3,38 @@ const axios = require('axios');
 
 const app = express();
 
-// CORS — разрешаем запросы только с вашего сайта
+// Middleware для CORS — работает для всех запросов
 app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', 'https://юристшпагин.рф');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  if (req.method === 'OPTIONS') return res.status(200).end();
+  // Разрешаем запросы с вашего домена
+  const allowedOrigins = [
+    'https://юристшпагин.рф',
+    'https://xn--80agnczifjj4d3c.xn--p1ai'
+  ];
+  const origin = req.headers.origin;
+
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
+
+  // Разрешаем методы и заголовки
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Credentials', 'true'); // если нужно
+
+  // Обработка preflight-запроса (OPTIONS)
+  if (req.method === 'OPTIONS') {
+    return res.status(204).end();
+  }
+
   next();
 });
 
 app.use(express.json());
 
 app.post('/api/chat', async (req, res) => {
+  console.log('✅ Получен запрос от:', req.headers.origin);
+
   try {
-    // Формируем сообщения для Ollama
     const messages = [
       {
         role: 'system',
@@ -29,7 +47,6 @@ app.post('/api/chat', async (req, res) => {
       ...req.body.messages
     ];
 
-    // Отправляем запрос в локальный Ollama
     const response = await axios.post(
       'http://localhost:11434/api/chat',
       {
@@ -41,22 +58,21 @@ app.post('/api/chat', async (req, res) => {
           num_ctx: 2048
         }
       },
-      { timeout: 120000 } // 2 минуты на ответ
+      { timeout: 120000 }
     );
 
-    // Форматируем ответ под OpenAI-совместимый формат (как в вашем чате)
+    console.log('✅ Ollama вернул ответ');
+
     res.json({
-      choices: [
-        {
-          message: {
-            content: response.data.message.content.trim()
-          }
+      choices: [{
+        message: {
+          content: response.data.message.content.trim()
         }
-      ]
+      }]
     });
 
   } catch (error) {
-    console.error('❌ Ollama error:', error.message || error);
+    console.error('❌ Ошибка Ollama:', error.message || error);
     res.status(500).json({
       error: 'Не удалось получить ответ от юриста. Попробуйте позже.'
     });
@@ -66,5 +82,4 @@ app.post('/api/chat', async (req, res) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`✅ Сервер запущен на порту ${PORT}`);
-  console.log(`✅ Ollama готов к запросам (модель: phi3:mini)`);
 });
